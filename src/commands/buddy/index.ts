@@ -12,12 +12,16 @@ const call: LocalCommandCall = async (args) => {
   const config = getGlobalConfig()
   const companion = getCompanion()
 
+  // 解析参数: /buddy <rarity> [name] [shiny]
+  const parts = arg.split(/\s+/)
+  const firstArg = parts[0]?.toLowerCase()
+
   // 没有参数 - 显示当前完整信息
-  if (!arg) {
+  if (!firstArg) {
     if (!companion) {
       return {
         type: 'text',
-        value: 'No companion found yet. Use /buddy <rarity> [name] to create one!\n\nAvailable rarities: common, uncommon, rare, epic, legendary\nExamples: /buddy legendary, /buddy legendary 小可爱',
+        value: 'No companion found yet. Use /buddy <rarity> [name] [shiny] to create one!\n\nAvailable rarities: common, uncommon, rare, epic, legendary\nExamples: /buddy legendary, /buddy legendary 小可爱, /buddy legendary 小可爱 shiny',
       }
     }
 
@@ -26,14 +30,9 @@ const call: LocalCommandCall = async (args) => {
 
     return {
       type: 'text',
-      value: `Your Buddy: ${companion.name}\n${stored?.customSeed ? `Custom Seed: ${stored.customSeed}\n` : ''}Species: ${companion.species}\nRarity: ${companion.rarity} ${stars}\nEye: ${companion.eye}\nHat: ${companion.hat}\nPersonality: ${companion.personality}\n${stored?.hatchedAt ? `Hatched at: ${new Date(stored.hatchedAt).toLocaleString()}\n` : ''}Shiny: ${companion.shiny ? '✨ Yes!' : 'No'}`,
+      value: `Your Buddy: ${companion.name}\n${stored?.customSeed ? `Custom Seed: ${stored.customSeed}\n` : ''}Species: ${companion.species}\nRarity: ${companion.rarity} ${stars}\nEye: ${companion.eye}\nHat: ${companion.hat}\nPersonality: ${companion.personality}\n${stored?.hatchedAt ? `Hatched at: ${new Date(stored.hatchedAt).toLocaleString()}\n` : ''}Shiny: ${companion.shiny ? '✨ Yes! (Rainbow mode enabled)' : 'No'}`,
     }
   }
-
-  // 解析参数: /buddy <rarity> [name]
-  const parts = arg.split(/\s+/)
-  const firstArg = parts[0]?.toLowerCase()
-  const nameArg = parts.slice(1).join(' ') || 'Buddy'
 
   // 检查是否是稀有度
   const rarity = firstArg as Rarity
@@ -43,6 +42,10 @@ const call: LocalCommandCall = async (args) => {
       value: `Invalid rarity. Choose from: ${RARITIES.join(', ')}`,
     }
   }
+
+  // 解析其他参数
+  const nameArg = parts[1] || 'Buddy'
+  const shinyArg = parts[2]?.toLowerCase() === 'shiny'
 
   // 尝试不同的种子直到找到想要的稀有度
   let foundSeed: string | undefined
@@ -68,11 +71,16 @@ const call: LocalCommandCall = async (args) => {
   }
 
   // 更新配置文件
-  const newCompanion = {
-    name: nameArg || 'Buddy',
+  const newCompanion: any = {
+    name: nameArg,
     personality: 'A faithful companion on your coding journey',
     hatchedAt: Date.now(),
     customSeed: foundSeed, // 使用自定义种子
+  }
+
+  // 如果指定了 shiny，覆盖随机值
+  if (shinyArg) {
+    newCompanion.shiny = true
   }
 
   const updatedConfig = {
@@ -88,18 +96,19 @@ const call: LocalCommandCall = async (args) => {
   })
 
   const stars = RARITY_STARS[rarity]
-  const nameDisplay = nameArg ? `"${nameArg}"` : 'Buddy'
+  const nameDisplay = nameArg === 'Buddy' ? 'Buddy' : `"${nameArg}"`
+  const shinyDisplay = shinyArg ? ' ✨ Shiny!' : ''
 
   return {
     type: 'text',
-    value: `🎉 Found a ${rarity} ${stars} Buddy named ${nameDisplay}!\n\nSpecies: ${foundBones.bones.species}\nEye: ${foundBones.bones.eye} (symbol code: ${foundBones.bones.eye.codePointAt(0)})\nHat: ${foundBones.bones.hat}\nShiny: ${foundBones.bones.shiny ? '✨ Yes!' : 'No'}\nCustom Seed: ${foundSeed}\n\nRestart to see your new Buddy!`,
+    value: `🎉 Found a ${rarity} ${stars} Buddy named ${nameDisplay}${shinyDisplay}!\n\nSpecies: ${foundBones.bones.species}\nEye: ${foundBones.bones.eye} (symbol code: ${foundBones.bones.eye.codePointAt(0)})\nHat: ${foundBones.bones.hat}\nShiny: ${shinyArg || foundBones.bones.shiny ? '✨ Yes!' : 'No'}\nCustom Seed: ${foundSeed}\n\nRestart to see your new Buddy!`,
   }
 }
 
 const buddy = {
   type: 'local',
   name: 'buddy',
-  description: 'Manage your Buddy companion. Usage: /buddy <rarity> [name]',
+  description: 'Manage your Buddy companion. Usage: /buddy <rarity> [name] [shiny]',
   supportsNonInteractive: true,
   load: () => Promise.resolve({ call }),
 } satisfies Command

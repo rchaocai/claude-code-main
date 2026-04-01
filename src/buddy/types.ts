@@ -112,6 +112,7 @@ export type CompanionSoul = {
   name: string
   personality: string
   customSeed?: string // Optional: use custom seed instead of userId for deterministic generation
+  shiny?: boolean // Optional: manually override shiny status (1% chance otherwise)
 }
 
 export type Companion = CompanionBones &

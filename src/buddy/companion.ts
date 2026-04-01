@@ -125,6 +125,7 @@ export function companionUserId(): string {
 // so species renames and SPECIES-array edits can't break stored companions,
 // and editing config.companion can't fake a rarity.
 // If customSeed is provided, use that instead of userId for the roll.
+// If shiny is provided in stored config, use that instead of random 1% chance.
 export function getCompanion(): Companion | undefined {
   const stored = getGlobalConfig().companion
   if (!stored) return undefined
@@ -136,10 +137,21 @@ export function getCompanion(): Companion | undefined {
   // Check cache
   const cacheKey = stored.customSeed ? `custom:${stored.customSeed}` : userId
   if (rollCache?.key === cacheKey) {
-    return { ...stored, ...rollCache.value.bones }
+    const cached = { ...stored, ...rollCache.value.bones }
+    // Use stored shiny override if present
+    if (stored.shiny !== undefined) {
+      cached.shiny = stored.shiny
+    }
+    return cached
   }
 
   const value = rollFrom(mulberry32(hashString(seedToUse)))
+
+  // Use stored shiny override if present, otherwise use rolled value
+  if (stored.shiny !== undefined) {
+    value.bones.shiny = stored.shiny
+  }
+
   rollCache = { key: cacheKey, value }
   // bones last so stale bones fields in old-format configs get overridden
   return { ...stored, ...value.bones }

@@ -13,6 +13,7 @@ import type { Theme } from '../utils/theme.js';
 import { getCompanion } from './companion.js';
 import { renderFace, renderSprite, spriteFrameCount } from './sprites.js';
 import { RARITY_COLORS } from './types.js';
+import { getRainbowColor } from '../utils/thinking.js';
 const TICK_MS = 500;
 const BUBBLE_SHOW = 20; // ticks → ~10s at 500ms
 const FADE_WINDOW = 6; // last ~3s the bubble dims so you know it's about to go
@@ -215,7 +216,12 @@ export function CompanionSprite(): React.ReactNode {
   if (!true) return null;
   const companion = getCompanion();
   if (!companion || getGlobalConfig().companionMuted) return null;
-  const color = RARITY_COLORS[companion.rarity];
+
+  // Shiny buddies get rainbow colors!
+  const color = companion.shiny
+    ? getRainbowColor(tick) // Rainbow color for shiny
+    : RARITY_COLORS[companion.rarity]; // Normal color based on rarity
+
   const colWidth = spriteColWidth(stringWidth(companion.name));
   const bubbleAge = reaction ? tick - lastSpokeTick.current : 0;
   const fading = reaction !== undefined && bubbleAge >= BUBBLE_SHOW - FADE_WINDOW;
@@ -227,15 +233,20 @@ export function CompanionSprite(): React.ReactNode {
   if (columns < MIN_COLS_FOR_FULL_SPRITE) {
     const quip = reaction && reaction.length > NARROW_QUIP_CAP ? reaction.slice(0, NARROW_QUIP_CAP - 1) + '…' : reaction;
     const label = quip ? `"${quip}"` : focused ? ` ${companion.name} ` : companion.name;
+    const nameColor = companion.shiny
+      ? getRainbowColor(tick)
+      : (reaction ? (fading ? 'inactive' : color) : (focused ? color : undefined));
+
     return <Box paddingX={1} alignSelf="flex-end">
         <Text>
           {petting && <Text color="autoAccept">{figures.heart} </Text>}
-          <Text bold color={color}>
+          <Text bold color={companion.shiny ? getRainbowColor(tick) : color}>
             {renderFace(companion)}
           </Text>{' '}
-          <Text italic dimColor={!focused && !reaction} bold={focused} inverse={focused && !reaction} color={reaction ? fading ? 'inactive' : color : focused ? color : undefined}>
+          <Text italic dimColor={!focused && !reaction} bold={focused} inverse={focused && !reaction} color={nameColor}>
             {label}
           </Text>
+          {companion.shiny && <Text color={getRainbowColor(tick + 3)}>✨</Text>}
         </Text>
       </Box>;
   }
@@ -264,12 +275,23 @@ export function CompanionSprite(): React.ReactNode {
   // sprite doesn't jump up when selected. flexShrink=0 stops the
   // inline-bubble row wrapper from squeezing the sprite to fit.
   const spriteColumn = <Box flexDirection="column" flexShrink={0} alignItems="center" width={colWidth}>
-      {sprite.map((line, i) => <Text key={i} color={i === 0 && heartFrame ? 'autoAccept' : color}>
-          {line}
-        </Text>)}
-      <Text italic bold={focused} dimColor={!focused} color={focused ? color : undefined} inverse={focused}>
+      {sprite.map((line, i) => {
+        // For shiny buddies, use rainbow color for the sprite body
+        const lineColor = companion.shiny && i > 0 && !heartFrame
+          ? getRainbowColor(tick + i) // Each line gets a different rainbow color
+          : (i === 0 && heartFrame ? 'autoAccept' : color);
+
+        return (
+          <Text key={i} color={lineColor}>
+            {line}
+          </Text>
+        );
+      })}
+      <Text italic bold={focused} dimColor={!focused} color={focused ? (companion.shiny ? getRainbowColor(tick) : color) : (companion.shiny ? getRainbowColor(tick) : undefined)} inverse={focused}>
         {focused ? ` ${companion.name} ` : companion.name}
       </Text>
+      {/* Shiny indicator */}
+      {companion.shiny && <Text color={getRainbowColor(tick + 5)}>✨</Text>}
     </Box>;
   if (!reaction) {
     return <Box paddingX={1}>{spriteColumn}</Box>;
