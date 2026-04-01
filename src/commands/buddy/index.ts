@@ -1,7 +1,7 @@
 import type { Command, LocalCommandCall } from '../../types/command.js'
 import { getCompanion, rollWithSeed } from '../../buddy/companion.js'
 import type { Rarity } from '../../buddy/types.js'
-import { RARITIES, RARITY_STARS } from '../../buddy/types.js'
+import { RARITIES, RARITY_STARS, STAT_NAMES, type StatName } from '../../buddy/types.js'
 import { getGlobalConfig } from '../../utils/config.js'
 import { writeFileSyncAndFlush_DEPRECATED } from '../../utils/file.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
@@ -21,16 +21,27 @@ const call: LocalCommandCall = async (args) => {
     if (!companion) {
       return {
         type: 'text',
-        value: 'No companion found yet. Use /buddy <rarity> [name] [shiny] to create one!\n\nAvailable rarities: common, uncommon, rare, epic, legendary\nExamples: /buddy legendary, /buddy legendary 小可爱, /buddy legendary 小可爱 shiny',
+        value: 'No companion found yet.\n\nCreate one with: /buddy <rarity> [name] [shiny]\n  rarity: common, uncommon, rare, epic, legendary\n  name: optional custom name (default: Buddy)\n  shiny: add "shiny" for rainbow effect\n\nExamples:\n  /buddy legendary\n  /buddy legendary 小可爱\n  /buddy legendary 小可爱 shiny',
       }
     }
 
     const stars = RARITY_STARS[companion.rarity]
     const stored = config.companion
 
+    // Sort stats by value (highest first) for display
+    const sortedStats = STAT_NAMES.map((name) => ({
+      name,
+      value: companion.stats[name],
+    }))
+      .sort((a, b) => b.value - a.value)
+
+    const statsDisplay = sortedStats
+      .map(({ name, value }) => `${name}: ${value}`)
+      .join('\n')
+
     return {
       type: 'text',
-      value: `Your Buddy: ${companion.name}\n${stored?.customSeed ? `Custom Seed: ${stored.customSeed}\n` : ''}Species: ${companion.species}\nRarity: ${companion.rarity} ${stars}\nEye: ${companion.eye}\nHat: ${companion.hat}\nPersonality: ${companion.personality}\n${stored?.hatchedAt ? `Hatched at: ${new Date(stored.hatchedAt).toLocaleString()}\n` : ''}Shiny: ${companion.shiny ? '✨ Yes! (Rainbow mode enabled)' : 'No'}`,
+      value: `Your Buddy: ${companion.name}\n${stored?.customSeed ? `Custom Seed: ${stored.customSeed}\n` : ''}Species: ${companion.species}\nRarity: ${companion.rarity} ${stars}\nEye: ${companion.eye}\nHat: ${companion.hat}\nPersonality: ${companion.personality}\n\nStats:\n${statsDisplay}\n${stored?.hatchedAt ? `Hatched at: ${new Date(stored.hatchedAt).toLocaleString()}\n` : ''}Shiny: ${companion.shiny ? '✨ Yes! (Rainbow mode enabled)' : 'No'}\n\nCreate a new buddy: /buddy <rarity> [name] [shiny]`,
     }
   }
 
@@ -99,9 +110,20 @@ const call: LocalCommandCall = async (args) => {
   const nameDisplay = nameArg === 'Buddy' ? 'Buddy' : `"${nameArg}"`
   const shinyDisplay = shinyArg ? ' ✨ Shiny!' : ''
 
+  // Sort stats by value (highest first) for display
+  const sortedStats = STAT_NAMES.map((name) => ({
+    name,
+    value: foundBones.bones.stats[name]!,
+  }))
+    .sort((a, b) => b.value - a.value)
+
+  const statsDisplay = sortedStats
+    .map(({ name, value }) => `${name}: ${value}`)
+    .join('\n')
+
   return {
     type: 'text',
-    value: `🎉 Found a ${rarity} ${stars} Buddy named ${nameDisplay}${shinyDisplay}!\n\nSpecies: ${foundBones.bones.species}\nEye: ${foundBones.bones.eye} (symbol code: ${foundBones.bones.eye.codePointAt(0)})\nHat: ${foundBones.bones.hat}\nShiny: ${shinyArg || foundBones.bones.shiny ? '✨ Yes!' : 'No'}\nCustom Seed: ${foundSeed}\n\nRestart to see your new Buddy!`,
+    value: `🎉 Found a ${rarity} ${stars} Buddy named ${nameDisplay}${shinyDisplay}!\n\nSpecies: ${foundBones.bones.species}\nEye: ${foundBones.bones.eye} (symbol code: ${foundBones.bones.eye.codePointAt(0)})\nHat: ${foundBones.bones.hat}\nShiny: ${shinyArg || foundBones.bones.shiny ? '✨ Yes!' : 'No'}\nCustom Seed: ${foundSeed}\n\nStats:\n${statsDisplay}\n\nRestart to see your new Buddy!`,
   }
 }
 
