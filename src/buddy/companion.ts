@@ -81,7 +81,7 @@ function rollStats(
   return stats
 }
 
-const SALT = 'friend-2026-401'
+const SALT = 'friend-2026-401-lucky'
 
 export type Roll = {
   bones: CompanionBones
@@ -113,7 +113,7 @@ export function roll(userId: string): Roll {
 }
 
 export function rollWithSeed(seed: string): Roll {
-  return rollFrom(mulberry32(hashString(seed)))
+  return rollFrom(mulberry32(hashString(seed + SALT)))
 }
 
 export function companionUserId(): string {
@@ -124,10 +124,23 @@ export function companionUserId(): string {
 // Regenerate bones from userId, merge with stored soul. Bones never persist
 // so species renames and SPECIES-array edits can't break stored companions,
 // and editing config.companion can't fake a rarity.
+// If customSeed is provided, use that instead of userId for the roll.
 export function getCompanion(): Companion | undefined {
   const stored = getGlobalConfig().companion
   if (!stored) return undefined
-  const { bones } = roll(companionUserId())
+
+  // Use customSeed if provided, otherwise use userId
+  const userId = companionUserId()
+  const seedToUse = stored.customSeed ? `${stored.customSeed}${SALT}` : `${userId}${SALT}`
+
+  // Check cache
+  const cacheKey = stored.customSeed ? `custom:${stored.customSeed}` : userId
+  if (rollCache?.key === cacheKey) {
+    return { ...stored, ...rollCache.value.bones }
+  }
+
+  const value = rollFrom(mulberry32(hashString(seedToUse)))
+  rollCache = { key: cacheKey, value }
   // bones last so stale bones fields in old-format configs get overridden
-  return { ...stored, ...bones }
+  return { ...stored, ...value.bones }
 }

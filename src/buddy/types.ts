@@ -111,6 +111,7 @@ export type CompanionBones = {
 export type CompanionSoul = {
   name: string
   personality: string
+  customSeed?: string // Optional: use custom seed instead of userId for deterministic generation
 }
 
 export type Companion = CompanionBones &
