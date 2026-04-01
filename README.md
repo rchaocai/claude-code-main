@@ -1,5 +1,11 @@
 # Claude Code 源码编译运行指南
 
+## 项目展示
+
+<div align="center">
+  <img src="images/screenshot.png" alt="Claude Code 运行截图" width="800"/>
+</div>
+
 ## 环境要求
 
 - [Bun](https://bun.sh) >= 1.3.11
