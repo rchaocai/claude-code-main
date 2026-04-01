@@ -15,7 +15,7 @@ import { loadMessageLogs } from './sessionStorage.js'
 import { getInitialSettings } from './settings/settings.js'
 
 // Layout constants
-const MAX_LEFT_WIDTH = 50
+const MAX_LEFT_WIDTH = 80
 const MAX_USERNAME_LENGTH = 20
 const BORDER_PADDING = 4
 const DIVIDER_WIDTH = 1
@@ -33,7 +33,7 @@ export type LayoutDimensions = {
  * Determines the layout mode based on terminal width
  */
 export function getLayoutMode(columns: number): LayoutMode {
-  if (columns >= 70) return 'horizontal'
+  if (columns >= 100) return 'horizontal'
   return 'compact'
 }
 
@@ -46,23 +46,15 @@ export function calculateLayoutDimensions(
   optimalLeftWidth: number,
 ): LayoutDimensions {
   if (layoutMode === 'horizontal') {
-    const leftWidth = optimalLeftWidth
-    const usedSpace =
-      BORDER_PADDING + CONTENT_PADDING + DIVIDER_WIDTH + leftWidth
-    const availableForRight = columns - usedSpace
+    // Fixed width for Buddha art display
+    const leftWidth = 50
+    const availableForRight = columns - leftWidth - DIVIDER_WIDTH - BORDER_PADDING * 2
 
-    let rightWidth = Math.max(30, availableForRight)
-    const totalWidth = Math.min(
-      leftWidth + rightWidth + DIVIDER_WIDTH + CONTENT_PADDING,
-      columns - BORDER_PADDING,
-    )
-
-    // Recalculate right width if we had to cap the total
-    if (totalWidth < leftWidth + rightWidth + DIVIDER_WIDTH + CONTENT_PADDING) {
-      rightWidth = totalWidth - leftWidth - DIVIDER_WIDTH - CONTENT_PADDING
+    return {
+      leftWidth,
+      rightWidth: Math.max(30, availableForRight),
+      totalWidth: columns - BORDER_PADDING,
     }
-
-    return { leftWidth, rightWidth, totalWidth }
   }
 
   // Vertical mode
@@ -81,14 +73,24 @@ export function calculateOptimalLeftWidth(
   welcomeMessage: string,
   truncatedCwd: string,
   modelLine: string,
+  columns?: number,
 ): number {
   const contentWidth = Math.max(
     stringWidth(welcomeMessage),
     stringWidth(truncatedCwd),
     stringWidth(modelLine),
-    20, // Minimum for clawd art
+    16, // Minimum for Buddha art
   )
-  return Math.min(contentWidth + 4, MAX_LEFT_WIDTH) // +4 for padding
+  const desiredWidth = contentWidth + 4
+
+  // If columns provided, use 4/5 (80%) of terminal width
+  if (columns) {
+    const fourFifthsOfTerminal = Math.floor(columns * 4 / 5)
+    return Math.min(desiredWidth, fourFifthsOfTerminal)
+  }
+
+  // Otherwise cap at 4/5 of MAX_LEFT_WIDTH
+  return Math.min(desiredWidth, Math.floor(MAX_LEFT_WIDTH * 4 / 5))
 }
 
 /**

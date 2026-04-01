@@ -33,42 +33,42 @@ type Segments = {
 };
 const POSES: Record<ClawdPose, Segments> = {
   default: {
-    r1L: ' ▐',
-    r1E: '▛███▜',
-    r1R: '▌',
-    r2L: '▝▜',
-    r2R: '▛▘'
+    r1L: ' _',
+    r1E: '☸_☸',
+    r1R: '_ ',
+    r2L: ' ',
+    r2R: ' '
   },
   'look-left': {
-    r1L: ' ▐',
-    r1E: '▟███▟',
-    r1R: '▌',
-    r2L: '▝▜',
-    r2R: '▛▘'
+    r1L: ' _',
+    r1E: '☸_☸',
+    r1R: '_ ',
+    r2L: ' ',
+    r2R: ' '
   },
   'look-right': {
-    r1L: ' ▐',
-    r1E: '▙███▙',
-    r1R: '▌',
-    r2L: '▝▜',
-    r2R: '▛▘'
+    r1L: ' _',
+    r1E: '☸_☸',
+    r1R: '_ ',
+    r2L: ' ',
+    r2R: ' '
   },
   'arms-up': {
-    r1L: '▗▟',
-    r1E: '▛███▜',
-    r1R: '▙▖',
-    r2L: ' ▜',
-    r2R: '▛ '
+    r1L: ' _',
+    r1E: '☸_☸',
+    r1R: '_ ',
+    r2L: ' ',
+    r2R: ' '
   }
 };
 
 // Apple Terminal uses a bg-fill trick (see below), so only eye poses make
 // sense. Arm poses fall back to default.
 const APPLE_EYES: Record<ClawdPose, string> = {
-  default: ' ▗   ▖ ',
-  'look-left': ' ▘   ▘ ',
-  'look-right': ' ▝   ▝ ',
-  'arms-up': ' ▗   ▖ '
+  default: '  ☸  ',
+  'look-left': '  ☸  ',
+  'look-right': '  ☸  ',
+  'arms-up': '  ☸  '
 };
 export function Clawd(t0) {
   const $ = _c(26);
@@ -164,14 +164,37 @@ export function Clawd(t0) {
   }
   let t11;
   if ($[22] === Symbol.for("react.memo_cache_sentinel")) {
-    t11 = <Text color="clawd_body">{"  "}▘▘ ▝▝{"  "}</Text>;
+    t11 = <Text color="clawd_body">{"  "}(____/ \_____){"  "}</Text>;
     $[22] = t11;
   } else {
     t11 = $[22];
   }
   let t12;
   if ($[23] !== t10 || $[24] !== t6) {
-    t12 = <Box flexDirection="column">{t6}{t10}{t11}</Box>;
+    t12 = (
+      <Box flexDirection="column" alignItems="center">
+        <Text color="clawd_body">_ooOoo_</Text>
+        <Text color="clawd_body">o8888888o</Text>
+        <Text color="clawd_body">88"{" . "}"88</Text>
+        <Text color="clawd_body">(| -_- |)</Text>
+        <Text color="clawd_body">O\  =  /O</Text>
+        <Text color="clawd_body">{"____/`---'\\____"}</Text>
+        <Text color="clawd_body">{".'  \\\\|     |//  `."}</Text>
+        <Text color="clawd_body">{"/  \\\\|||  :  |||//  \\"}</Text>
+        <Text color="clawd_body">{"/  _||||| -:- |||||_  \\"}</Text>
+        <Text color="clawd_body">{"|   | \\\\\\  -  /// |   |"}</Text>
+        <Text color="clawd_body">{"|   |  ''\\---/''  |   |"}</Text>
+        <Text color="clawd_body">{"\\ .-\\___  `-`  ___/-. /"}</Text>
+        <Text color="clawd_body">{"___`. .'  /--.--\\  `. . ___"}</Text>
+        <Text color="clawd_body">{'.""  <  `.___\\_<|>_/___.` >  "" .'}</Text>
+        <Text color="clawd_body">{"| | : ` - \\`.:`\\ _ /`:.`/ - ` : | |"}</Text>
+        <Text color="clawd_body">{"\\  \\ `-.   \\_ __\\ /__ _/   .-` /  /"}</Text>
+        <Text color="clawd_body">{"======'-.____'-.__\\\\\\\\___////__.-'____.-'======"}</Text>
+        <Text color="clawd_body">{"'=---='"}</Text>
+        <Text color="clawd_body">{"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"}</Text>
+        <Text color="clawd_body">{'佛祖保佑       永无BUG'}</Text>
+      </Box>
+    );
     $[23] = t10;
     $[24] = t6;
     $[25] = t12;
@@ -220,7 +243,7 @@ function AppleTerminalClawd(t0) {
   let t7;
   if ($[6] === Symbol.for("react.memo_cache_sentinel")) {
     t6 = <Text backgroundColor="clawd_body">{" ".repeat(7)}</Text>;
-    t7 = <Text color="clawd_body">▘▘ ▝▝</Text>;
+    t7 = <Text color="clawd_body">☸ ☸</Text>;
     $[6] = t6;
     $[7] = t7;
   } else {
@@ -229,7 +252,30 @@ function AppleTerminalClawd(t0) {
   }
   let t8;
   if ($[8] !== t5) {
-    t8 = <Box flexDirection="column" alignItems="center">{t5}{t6}{t7}</Box>;
+    t8 = (
+      <Box flexDirection="column" alignItems="center">
+        <Text color="clawd_body">_ooOoo_</Text>
+        <Text color="clawd_body">o8888888o</Text>
+        <Text color="clawd_body">88" . "88</Text>
+        <Text color="clawd_body">(| -_- |)</Text>
+        <Text color="clawd_body">O\  =  /O</Text>
+        <Text color="clawd_body">{"____/`---'\\____"}</Text>
+        <Text color="clawd_body">{".'  \\|     |//  `."}</Text>
+        <Text color="clawd_body">{" /  \\\\|||  :  |||//  \\"}</Text>
+        <Text color="clawd_body">{" /  _||||| -:- |||||-  \\"}</Text>
+        <Text color="clawd_body">{" |   | \\\\\\\\  -  /// |   |"}</Text>
+        <Text color="clawd_body">{" | \\\\_|  ''\\\\---/''  |   |"}</Text>
+        <Text color="clawd_body">{" \\\\  .-\\\\\\\__  `-`  ___/-. /"}</Text>
+        <Text color="clawd_body">{"___`. .'  /--.--\\\\  `. . __"}</Text>
+        <Text color="clawd_body">{'. "" <  `.__\\\\\\\_<|>_/___.  >"" .'}</Text>
+        <Text color="clawd_body">{" | | :  `- \\\\.;`\\\\ _ /`;.`/ - ` : | |"}</Text>
+        <Text color="clawd_body">{" \\\\  \\\\ `-.   \\\\\\\\_ __\\\\ /__ _/   .-` /  /"}</Text>
+        <Text color="clawd_body">{"======`-.____`-.__\\\\\\\\_____/___.-`____.-'======"}</Text>
+        <Text color="clawd_body">{"`=---='"}</Text>
+        <Text color="clawd_body">{"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"}</Text>
+        <Text color="clawd_body">{'佛祖保佑       永无BUG'}</Text>
+      </Box>
+    );
     $[8] = t5;
     $[9] = t8;
   } else {
